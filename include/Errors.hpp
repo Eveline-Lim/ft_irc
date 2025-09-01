@@ -1,0 +1,31 @@
+#ifndef ERRORS_HPP
+# define ERRORS_HPP
+
+#define ERR_UNKNOWNCOMMAND(nick) "421 " + std::string(nick) + " :Unknown command\r\n"
+#define ERR_ALREADYREGISTERED(nick) "462 " + std::string(nick) + " :You may not reregister\r\n"
+#define ERR_PASSWDMISMATCH(nick) "464 " + std::string(nick) + " :Password incorrect\r\n"
+#define ERR_NOTREGISTERED(nick) "451 " + std::string(nick) + " :You have not registered\r\n"
+#define ERR_NOOPERHOST(nick) "491 " + std::string(nick) + " :No O-lines for your host\r\n"
+#define ERR_NOORIGIN(nick) "409 " + std::string(nick) + " :No origin specified\r\n"
+#define ERR_NOTEXTTOSEND(nick) "412 " + std::string(nick) + ": No text to send\r\n"
+#define ERR_NOSUCHNICK(nick, target) "401 " + std::string(nick) + " " + std::string(target) + " :No such nick/channel\r\n"
+#define ERR_NOSUCHCHANNEL(nick, channel) "403 " + std::string(nick) + " " + std::string(channel) + " :No such channel\r\n"
+#define ERR_TOOMANYCHANNELS(nick, channel) "405 " + std::string(nick) + " " + std::string(channel) + " :You have joined too many channels\r\n"
+#define ERR_NONICKNAMEGIVEN "431 * :No nickname given\r\n"
+#define ERR_ERRONEUSNICKNAME(oldnick, newnick) "432 *" + std::string(oldnick) + " " + std::string(newnick) + " :Erroneus nickname\r\n"
+#define	ERR_NICKNAMEINUSE(oldnick, newnick) "433 *" + std::string(oldnick) + " " + std::string(newnick) + " :Nickname is already in use\r\n"
+#define ERR_USERNOTINCHANNEL(nick, channel) "441 " + std::string(nick) + " " + std::string(channel) + " :They aren't on that channel\r\n"
+#define ERR_NOTONCHANNEL(nick, channel) "442 " + std::string(nick) + " " + std::string(channel) + " :You're not on that channel\r\n"
+#define ERR_NEEDMOREPARAMS(nick) "461 " + std::string(nick) + " " + " :Not enough parameters\r\n"
+#define ERR_KEYISMISSING(nick, channel) "461 " + std::string(nick) + " " + std::string(channel) + " +k :Key is missing\r\n"
+#define ERR_INVALIDLIMIT(nick, channel) "467 " + nick + " " + channel + " " + "limit" + " :Invalid limit\r\n"
+#define ERR_CHANNELISFULL(nick, channel) "471 " + std::string(nick) + " " + std::string(channel) + " :Cannot join channel (+l)\r\n"
+#define ERR_UNKNOWNMODE(nick, mode) "472 " + std::string(nick) + " " + char(mode) + " :is not a recognized channel mode\r\n"
+#define ERR_INVITEONLYCHAN(nick, channel) "473 " + nick + " " + channel + " :Cannot join channel (+i)\r\n"
+#define	ERR_BADCHANNELKEY(nick, channel) "475 " + std::string(nick) + " " + std::string(channel) + " :Cannot join channel (+k)\r\n"
+#define ERR_CHANOPRIVISNEEDED(nick, channel) "482 : " + std::string(nick) + " " + std::string(channel) + " :You must be a channel operator\r\n"
+#define ERR_BADTOKENCHAN(client, channel) std::string (client) + " " + std::string(channel) + " :Wrong or missing token before channel name\r\n"
+#define ERR_UNKNOWNMODEFLAG(nick) "501 " + std::string(nick) + " :Unknown MODE flag\r\n"
+#define ERR_BADCHANMASK(nick, channel) "476 " + std::string(nick) + " " + std::string(channel) + " :Invalid channel name\r\n"
+
+#endif
