@@ -19,14 +19,6 @@
 #define RPL_NAMREPLY(nickname, channel, userlist) "353 " + std::string(nickname) + " = " + std::string(channel) + " :" + userlist + "\r\n"
 #define RPL_TOPIC(nickname, channel, topic) "332 " + std::string(nickname) + " " + std::string(channel) + " :" + std::string(topic) + "\r\n"
 
-
-// RPL PAS A JESSICA
-// #define RPL_JOIN(hostname, ipaddress, channelname) (":" + hostname + "@" + ipaddress + " JOIN #" + channelname + CRLF)
-// #define RPL_NAMREPLY(nickname, channelname, clientslist) (": 353 " + nickname + " @ #" + channelname + " :" + clientslist + CRLF)
-// #define RPL_ENDOFNAMES(nickname, channelname) (": 366 " + nickname + " #" + channelname + " :END of /NAMES list" + CRLF)
-// #define RPL_TOPIC(nickname, channelname, topic) (": 332 " + nickname + " #" +channelname + " :" + topic + "\r\n")
-
-
 #define	RPL_PART(nickname, username, cmd, channel, reason) ":" + nickname + "!~" + username + "@server " + cmd + " " + channel + " " + reason + "\r\n"
 #define	RPL_NICK(oldnickname, username, cmd, nickname) ":" + oldnickname + "!~" + username + "@server " + cmd + " " + nickname + "\r\n"
 

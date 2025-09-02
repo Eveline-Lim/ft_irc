@@ -7,8 +7,6 @@ void	Server::sigintHandler(int signal)
 	{
 		signalGlobal = 1;
 		std::cout << "Exiting server by using ctrl+c" << std::endl;
-		// close (STDIN_FILENO);
-		// exit(0);
 	}
 	else
 	{
@@ -25,4 +23,7 @@ void	Server::setSignal(void)
 	bzero(&act, sizeof(act));
 	act.sa_handler = sigintHandler;
 	sigaction(SIGINT, &act, NULL);
+	std::cout << "LALA" << std::endl;
+	closeFd();
+	close(_fdserver);  // where socket_fd is the one returned by `socket()`
 }

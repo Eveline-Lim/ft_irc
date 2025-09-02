@@ -88,7 +88,7 @@ class Server
 		// void	sendMessage(std::vector<Client*>::iterator it);
 		void	sendMessage();
 		void	displayVector(void);
-		std::vector<Client*> getClients(void);
+		std::vector<Client*> &getClients(void);
 		std::map<std::string, Channel*>& getChannels(void);
 		void 	addClientToChannel(Client* client);
 		void    inviteClient(Client* client);
@@ -103,6 +103,10 @@ class Server
 		bool	FirstThreeCmdsTrue(std::vector<Client*>::iterator it);
 		void	ping(std::vector<Client*>::iterator it);
 		int 	getClientFd(std::string const &nickname);
+		void	closeAllfd(int clientFd);
+		void	removeChannel(std::string const &chanName);
+
+		int	retrieveVectorSize();
 
 
 	private:

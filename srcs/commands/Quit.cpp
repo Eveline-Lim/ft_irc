@@ -33,11 +33,6 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 	fds.insert((*it)->getFd());
 	std::map<std::string, std::set<int> > &output = server.getOutput();
 
-	if (!((*it))->tryJoinChannel())
-	{
-		output.insert(std::pair<std::string, std::set<int> >("Client must register to access to channels\r\n", fds));
-		return ;
-	}
 	// if (!quitMessage.empty() && quitMessage[0] == ' ')
 	// {
 	// 	quitMessage.erase(0, 1);
@@ -47,21 +42,36 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 
 	// Remove client from all channels
 	std::map<std::string, Channel*> &channels = server.getChannels();
-	for (std::map<std::string, Channel*>::iterator ite = channels.begin(); ite != channels.end(); ite++)
+	for (std::map<std::string, Channel*>::iterator ite = channels.begin(); ite != channels.end(); )
 	{
 		if (ite->second->isClientInChannel((*it)->getNick()))
 		{
+			std::string msg;
+			std::set<int> set = ite->second->noMsgforme((*it));
+			if (!quitMessage.empty())
+			{
+				msg = ":" + (*it)->getNick() + "!~" + (*it)->getUser() + "@server QUIT :Quit " + quitMessage + "\r\n";
+			}
+			else
+			{
+				msg = ":" + (*it)->getNick() + "!~" + (*it)->getUser() + "@server QUIT :Quit \r\n";
+			}
+			output[msg].insert(set.begin(), set.end());
 			ite->second->removeClientFromChannel((*it)->getNick());
-			output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " removed from " + ite->first + "\n", fds));
+			std::map<std::string, Channel*>::iterator tmpIt = ite;
+			std::cout << "tmpIt:" <<  tmpIt->first << std::endl;
+			++tmpIt;
+			if (ite->second->getClientList().size() == 0)
+			{
+				server.removeChannel(ite->second->getName());
+			}
+			ite = tmpIt;
+		}
+		else
+		{
+			++ite;
 		}
 	}
-
-	// Envoyer un message a tous les clients du serveur pour leur notifier le depart de x
-	// std::string notification = ":" + (*it)->getNick() + " QUIT";
-	// if (!quitMessage.empty())
-	// {
-	// 	notification += " :" + quitMessage;
-	// }
 
 	// std::vector<Client*> clients = server.getClients();
 	// for (size_t i = 0; i < clients.size(); ++i)
@@ -73,6 +83,9 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 	// }
 
 	// Remove client from server
-	server.removeClient((*it)->getNick());
-	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " has quit the server\n", fds));
+	// server.closeFd();
+	// server.closeAllfd((*it)->getFd());
+	// close((*it)->getFd());
+	// server.removeClient((*it)->getNick());
+
 }

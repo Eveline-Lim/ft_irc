@@ -29,7 +29,7 @@ void Join::leaveAllChannels(Server &server, Client* client)
 		Channel *chan = it->second;
 		if (chan->isClientInChannel(client->getNick()))
 		{
-		    chan->removeClientFromChannel(client->getNick());
+			chan->removeClientFromChannel(client->getNick());
 		}
 	}
 }
@@ -99,20 +99,6 @@ void Join::execute(Server &server, std::string const &command, std::vector<Clien
 			std::cout << "channelName: " << channelName << std::endl;
 			if (!chan->getPassword().empty() && chan->getPassword() != key)
 			{
-				// std::cout << "chan password: " << chan->getPassword() << std::endl;
-				// std::cout << "key: " << key << std::endl;
-				// std::cout << "chan password length: " << chan->getPassword().size() << std::endl;
-				// std::cout << "key length: " << key.size() << std::endl;
-				// for (size_t i = 0; i < pass.length(); i++)
-				// {
-				// 	std::cout << "pass[i] = " << (int)pass[i] << std::endl;
-				// }
-				// std::cout << "----------------------------------------" << std::endl;
-
-				// for (size_t i = 0; i < key.length(); i++)
-				// {
-				// 	std::cout << "key[i] = " << (int)key[i] << std::endl;
-				// }
 				output[ERR_BADCHANNELKEY((*it)->getNick(), channelName)].insert((*it)->getFd());
 				continue ;
 			}
@@ -153,22 +139,20 @@ void Join::execute(Server &server, std::string const &command, std::vector<Clien
 		std::string names = chan->getClientsList();
 		std::cout << "names: " << names << std::endl;
 
-		// if (!chan->getTopic().empty())
 		output.insert(std::pair<std::string, std::set<int> >(RPL_JOIN((*it)->getNick(), (*it)->getUser(), "JOIN", chan->getName()), fds));
-		// 	output.insert(std::pair<std::string, std::set<int> >(RPL_TOPIC((*it)->getNick(), chan->getName(), chan->getTopic()), fds));
-		// output.insert(std::pair<std::string, std::set<int> >(RPL_NAMREPLY((*it)->getNick(), chan->getName(), chan->getClientsList()), fds));
+		if (!chan->getTopic().empty())
+			output.insert(std::pair<std::string, std::set<int> >(RPL_TOPIC((*it)->getNick(), chan->getName(), chan->getTopic()), fds));
+		output.insert(std::pair<std::string, std::set<int> >(RPL_NAMREPLY((*it)->getNick(), chan->getName(), chan->getClientsList()), fds));
 		output.insert(std::pair<std::string, std::set<int> >(RPL_ENDOFNAME((*it)->getNick(), chan->getName()), fds));
 		output[RPL_JOIN((*it)->getNick(), (*it)->getUser(), "JOIN", chan->getName())].insert(set.begin(), set.end());
-
 
 		// output[RPL_JOIN((*it)->getNick(), (*it)->getUser(), "JOIN", chan->getName())].insert(set.begin(), set.end());
 		// 	output[RPL_TOPIC((*it)->getNick(), chan->getName(), chan->getTopic())].insert(set.begin(), set.end());
 		// output[RPL_NAMREPLY((*it)->getNick(), chan->getName(), chan->getClientsList())].insert(set.begin(), set.end());
 		//output[RPL_ENDOFNAME((*it)->getNick(),chan->getName())].insert(set.begin(), set.end());
-		// std::map<std::string, Client *> &listclient = chan->getClientList();
-		// Le message affiche seulement le nom du dernier channel;
 		/* **** DEBUG **** */
 		chan->displayMap();
+		
 		/* **************** */
 	}
 }

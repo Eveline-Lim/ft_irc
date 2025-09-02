@@ -46,14 +46,14 @@ void User::execute(Server &server, std::string const &command, std::vector<Clien
 	ss.clear();
 	ss.seekg(0);
 	std::string username;
-	int mode;
-	char unused;
+	// int mode;
+	// char unused;
 	std::string realname;
 
-	ss >> username >> mode >> unused >> realname;
+	ss >> username >> realname;
 	std::cout << "username: " << username << std::endl;
-	std::cout << "mode: " << "" << mode << std::endl;
-	std::cout << "unused: " << unused << std::endl;
+	// std::cout << "mode: " << "" << mode << std::endl;
+	// std::cout << "unused: " << unused << std::endl;
 	std::cout << "realname:" << realname << std::endl;
 
 	if (!((*it))->tryRegister())

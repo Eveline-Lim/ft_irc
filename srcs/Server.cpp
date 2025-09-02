@@ -153,9 +153,7 @@ bool Server::checkPoll(Server &server)
 								std::string res;
 								if ((*it)->getInput(res) == true)
 									executeCommands((char *)res.c_str(), server, it);
-
 							}
-							// if (POLLOUT)
 						}
 					}
 					// ? boolean for connection closed = false if error ?
@@ -184,10 +182,34 @@ void	Server::deleteClients(int index)
 
 void	Server::closeFd() // fermeture SEULEMENT clients ! ne pas fermer pas le fd du server
 {
-	for (unsigned int i = 0; i < idClient.size() ;i++)
+	std::cout << "ICI" << std::endl;
+	// for (unsigned int i = 0; i < idClient.size() ;i++)
+	// {
+	// 	close(idClient[i]->getFd());
+	// }
+	for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); ++it)
 	{
-		close(idClient[i]->getFd());
+		close((*it)->getFd());
+		if (*it)
+			delete (*it);
 	}
+}
+
+void	Server::closeAllfd(int clientFd)
+{
+	// for (unsigned int i = 1; i < fds.size() ;i++)
+	// {
+	// 	close(fds[i].fd);
+	// }
+	for (std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); ++it)
+	{
+		if (it->fd == clientFd)
+		{
+			it = fds.erase(it);
+			break;
+		}
+	}
+
 }
 
 void	Server::newClient()
@@ -309,7 +331,7 @@ bool Server::executeCommands(char *buffer, Server &server, std::vector<Client*>:
 
 		case CAP:
 			std::cout << "CAP FOUND" << std::endl;
-			// output.insert(std::pair<std::string, std::set<int> >(":server CAP * LS :KICK INVITE TOPIC MODE\r\n", fds));
+			output.insert(std::pair<std::string, std::set<int> >(":server CAP * LS :KICK INVITE TOPIC MODE\r\n", fds));
 			break ;
 
 		case JOIN:
@@ -394,9 +416,14 @@ void Server::displayVector(void)
 	}
 }
 
-std::vector<Client*> Server::getClients(void)
+std::vector<Client*> &Server::getClients(void)
 {
 	return (idClient);
+}
+
+int	Server::retrieveVectorSize()
+{
+	return (idClient.size());
 }
 
 void	Server::sendMsgtoClient(int fd, std::string msg)
@@ -427,7 +454,7 @@ void	Server::sendMessage()
 		for (std::set<int>::iterator setIt = msg_it->second.begin(); setIt != msg_it->second.end();setIt++)
 			send(*setIt, msg_it->first.c_str(), msg_it->first.size(), 0);
 		// std::cerr << "fd: " << *msg_it->second.begin() << " message: " <<msg_it->first.c_str() << std::endl;
-		break;
+		// break;
 	}
 	output.clear();
 }
@@ -436,6 +463,7 @@ std::map<std::string, std::set<int> > &Server::getOutput(void)
 {
 	return (output);
 }
+
 std::vector<Client*> Server::getClientId()
 {
 	return (idClient);
@@ -450,7 +478,7 @@ void Server::removeClient(std::string const &nickname)
 		if ((*it)->getNick() == nickname)
 		{
 			idClient.erase(it);
-			return;
+			break ;
 		}
 	}
 }
@@ -465,6 +493,7 @@ char *getTimeOfCreation(void)
 	std::time_t	result = std::time(NULL);
 	return (std::asctime(std::localtime(&result)));
 }
+
 bool	Server::FirstThreeCmdsTrue(std::vector<Client*>::iterator it)
 {
 	std::cout << "ICI" << std::endl;
@@ -494,4 +523,12 @@ void	Server::ping(std::vector<Client*>::iterator it)
 	fds.insert((*it)->getFd());
 
 	output.insert(std::pair<std::string, std::set<int> >("PONG\r\n", fds));
+}
+
+void	Server::removeChannel(std::string const &chanName)
+{
+	std::map<std::string, Channel *>::iterator it = _channels.find(chanName);
+	std::cout << "CHANNED REMOVED" << std::endl;
+	delete (it->second);
+	_channels.erase(it);
 }

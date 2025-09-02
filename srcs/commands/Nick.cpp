@@ -114,28 +114,5 @@ void Nick::execute(Server &server, std::string const &command, std::vector<Clien
 	output[RPL_NICK(oldNick, (*it)->getUser(), command, (*it)->getNick())].insert((*it)->getFd());
 	// (*it)->setNick(nickname);
 	std::cout << "new nick123: " << (*it)->getNick() << std::endl;
-	server.FirstThreeCmdsTrue(it);
+	// server.FirstThreeCmdsTrue(it);
 }
-
-// // nick.cpp
-// // Change oper/user in channel if in it
-// for (std::map<std::string, Channel *>::iterator channels_it = listChannels.begin(); channels_it != listChannels.end(); ++channels_it)
-// {
-//     std::map<std::string, Client *>&    chan_opers = channels_it->second->getOperList();
-//     std::map<std::string, Client *>&    chan_users = channels_it->second->getUser
-//     std::map<std::string, Client *>::iterator oper_it = chan_opers.find(oldNick);
-//     if (chan_opers.find(oldNick) != chan_opers.end())
-//     {
-//         Client*    client = oper_it->second;
-//         chan_opers.erase(oper_it);
-//         chan_opers[newNick] = client;
-//     }
-//     std::map<std::string, Client *>::iterator user_it = chan_users.find(oldNick);
-//     if (chan_users.find(oldNick) != chan_users.end())
-//     {
-//         Client    *client = user_it->second;
-//         chan_users.erase(user_it);
-//         chan_users[newNick] = client;
-//     }
-// }
-
