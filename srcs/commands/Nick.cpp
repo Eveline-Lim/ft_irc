@@ -31,6 +31,11 @@ void Nick::execute(Server &server, std::string const &command, std::vector<Clien
 	fds.insert((*it)->getFd());
 	std::map<std::string, std::set<int> > &output = server.getOutput();
 
+	if (!((*it))->tryRegister())
+	{
+		output[ERR_NOTREGISTERED((*it)->getNick())].insert((*it)->getFd());
+		return ;
+	}
 	while (ss >> word)
 	{
 		count++;
@@ -44,56 +49,38 @@ void Nick::execute(Server &server, std::string const &command, std::vector<Clien
 	ss.seekg(0);
 	std::string nickname;
 	ss >> nickname;
-
-	if (!((*it))->tryRegister())
+	std::string const &newNick = nickname;
+	if (newNick.size() > 10)
 	{
-		output[ERR_NOTREGISTERED((*it)->getNick())].insert((*it)->getFd());
 		return ;
 	}
-	if (nickname.size() > 10)
+	for (unsigned int i = 0; i < newNick.size(); i++)
 	{
-		output[command + ": max length for nickname is 9\r\n"].insert((*it)->getFd());
-		return ;
-	}
-	for (unsigned int i = 0; i < nickname.size(); i++)
-	{
-		if (nickname[i] == ' ' || nickname[i] == ',' || nickname[i] == '*' || nickname[i] == '?' ||
-			nickname[i] == '!' || nickname[i] == '@' || nickname[i] == '.' || nickname[i] == '$' || nickname[i] == ':')
+		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' || newNick[i] == '?' ||
+			newNick[i] == '!' || newNick[i] == '@' || newNick[i] == '.' || newNick[i] == '$' || newNick[i] == ':')
 		{
-			output[ERR_ERRONEUSNICKNAME((*it)->getNick(), nickname)].insert((*it)->getFd());
+			output[ERR_ERRONEUSNICKNAME((*it)->getNick(), newNick)].insert((*it)->getFd());
 			return ;
 		}
 	}
 
-	std::cout << "nickname: " << nickname << std::endl;
+	std::cout << "newNick: " << newNick << std::endl;
 	std::vector<Client*> clients = server.getClients();
 	for (size_t i = 0; i < clients.size(); ++i)
 	{
-		if (clients[i]->getNick() == nickname && clients[i] != *it)
+		if (clients[i]->getNick() == newNick)
 		{
 			// std::set<int> fds;
 			// fds.insert((*it)->getFd());
-			output[ERR_NICKNAMEINUSE((*it)->getNick(), nickname)].insert((*it)->getFd());
+			output[ERR_NICKNAMEINUSE((*it)->getNick(), newNick)].insert((*it)->getFd());
+			if ((*it)->getIsNicknameSet() == false)
+				output[newNick + ":Server :Connection refused, nickname already in use\r\n"].insert((*it)->getFd());
 			return;
 		}
 	}
-	// ? boucle pour parcourir vector client et verifier doublons nick client ?
-	// if (nickname == (*it)->getNick())
-	// {
-	// 	output.insert(std::pair<std::string, std::set<int> >(ERR_NICKNAMEINUSE((*it)->getNick(), (*it)->getNick()), fds));
-	// 	return ;
-	// }
-	// if ((*it)->getUse() == false)
-	// 	(*it)->setNick(nickname);
-	// else
-	// {
-	// 	(*it)->setNick(nickname);
-	// 	output.insert(std::pair<std::string, std::set<int> >(RPL_CHGENICK(nickname), fds));
-	// }
-
 	std::string oldNick = (*it)->getNick();
 	std::cout << "oldNick = " << oldNick << std::endl;
-	(*it)->setNick(nickname);
+	(*it)->setNick(newNick);
 	std::cout << "new nick: " << (*it)->getNick() << std::endl;
 	std::cout << "fd: " << (*it)->getFd() << std::endl;
 	(*it)->setIsNicknameSet(true);
@@ -108,11 +95,9 @@ void Nick::execute(Server &server, std::string const &command, std::vector<Clien
 		{
 			Client *client = userIt->second;
 			clientList.erase(userIt);
-			clientList[nickname] = client;
+			clientList[newNick] = client;
 		}
 	}
-	output[RPL_NICK(oldNick, (*it)->getUser(), command, (*it)->getNick())].insert((*it)->getFd());
-	// (*it)->setNick(nickname);
-	std::cout << "new nick123: " << (*it)->getNick() << std::endl;
-	// server.FirstThreeCmdsTrue(it);
+	output[RPL_NICK(oldNick, (*it)->getUser(), command, newNick)].insert((*it)->getFd());
+	server.FirstThreeCmdsTrue(it);
 }

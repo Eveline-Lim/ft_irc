@@ -76,47 +76,47 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 
 		for (size_t i = 0; i < users.size(); ++i)
 		{
+			std::string user = users[i];
+			std::cout << "user: " << user << std::endl;
 			//Client* target = server.getClientByNick(users[i]);
 
 			std::vector<Client*> clients = server.getClients();
-			Client *targetClient = NULL;
+			//Client *targetClient = NULL;
 
+			// std::cout << "targetClient name: " << targetClient->getNick() << std::endl;
 			for (size_t i = 0; i < clients.size(); i++)
 			{
 				std::cout << "client -> " << i << clients[i]->getNick() << std::endl;
-				std::cout << "targetClient name: " << targetClient->getNick() << std::endl;
-				if (clients[i]->getNick() == targetClient->getNick())
+				if (clients[i]->getNick() == user)
 				{
-					targetClient = clients[i];
+					// targetClient = clients[i];
 					break;
 				}
 			}
 
-			if (!targetClient)
+			// if (!targetClient)
+			// {
+			// 	output[ERR_USERNOTINCHANNEL(users[i], channelName)].insert((*it)->getFd());
+			// 	continue;
+			// }
+
+			if (!ite->second->isClientInChannel(user))
 			{
-				output[ERR_USERNOTINCHANNEL(users[i], channelName)].insert((*it)->getFd());
+				output[ERR_USERNOTINCHANNEL(user, channelName)].insert((*it)->getFd());
 				continue;
 			}
 
-			if (!ite->second->isClientInChannel(targetClient->getNick()))
-			{
-				output[ERR_USERNOTINCHANNEL(targetClient->getNick(), channelName)].insert((*it)->getFd());
-				continue;
-			}
+			ite->second->removeClientFromChannel(user);
 
-			ite->second->removeClientFromChannel(targetClient->getNick());
-
-			std::string kickMsg = ":" + (*it)->getNick() + " KICK " + channelName + " " + targetClient->getNick();
 			if (!comment.empty())
 			{
-				kickMsg += " :" + comment;
-			}
-			kickMsg += "\r\n";
+				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert((*it)->getFd());
 
-			//std::set<int> recipients = channel->getAllClientFds();
-			//recipients.insert(targetClient->getFd()); // pour que la cible reçoive le message
-			//output[kickMsg] = recipients;
-			output[kickMsg];
+			}
+			else
+			{
+				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert((*it)->getFd());
+			}
 		}
 	}
 	else // Cas : correspondance 1:1 entre channels[i] et users[i]
@@ -125,6 +125,7 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 		{
 			std::string channelName = channels[i];
 			std::string user = users[i];
+			std::cout << "user: " << user << std::endl;
 
 			//Channel *channel = server.getChannel(channelName);
 			std::map<std::string, Channel*> &serverChannels = server.getChannels();
@@ -140,26 +141,26 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 			if (!ite->second->isOperator((*it)->getNick()))
 			{
 				output[ERR_CHANOPRIVISNEEDED((*it)->getNick(), channelName)].insert((*it)->getFd());
-				continue;
+				return ;
 			}
 
 			std::vector<Client*> clients = server.getClients();
-			Client *targetClient = NULL;
+			// Client *targetClient = NULL;
 
 			for (size_t i = 0; i < clients.size(); i++)
 			{
-				if (clients[i]->getNick() == targetClient->getNick())
+				if (clients[i]->getNick() == user)
 				{
-					targetClient = clients[i];
+					// targetClient = clients[i];
 					break;
 				}
 			}
 
-			if (!targetClient)
-			{
-				output[ERR_USERNOTINCHANNEL(user, channelName)].insert((*it)->getFd());
-				continue;
-			}
+			// if (!targetClient)
+			// {
+			// 	output[ERR_USERNOTINCHANNEL(user, channelName)].insert((*it)->getFd());
+			// 	continue;
+			// }
 
 			if (!ite->second->isClientInChannel(user))
 			{
@@ -167,21 +168,18 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 				continue;
 			}
 
-			ite->second->removeClientFromChannel(user);
+			std::cout << "user: " << user << std::endl;
+			ite->second->removeClientFromChannel((*it)->getNick());
 
 			if (!comment.empty())
 			{
-				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, targetClient->getNick(), comment)].insert((*it)->getFd());
+				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert((*it)->getFd());
 
 			}
 			else
 			{
-				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, targetClient->getNick(), comment)].insert((*it)->getFd());
+				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert((*it)->getFd());
 			}
-
-			// std::set<int> recipients = channel->getAllClientFds();
-			// recipients.insert(targetClient->getFd());
-			// output[kickMsg] = recipients;
 		}
 	}
 }

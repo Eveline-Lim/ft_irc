@@ -90,6 +90,7 @@ void Part::execute(Server &server, std::string const &command, std::vector<Clien
 		}
 
 		// Envoyer message PART au client
-		output.insert(std::pair<std::string, std::set<int> >(RPL_PART((*it)->getNick(), (*it)->getUser(), command, channelName, comment), fds));
+		std::set<int> set = chan->noMsgforme((*it));
+		output[RPL_PART((*it)->getNick(), (*it)->getUser(), command, channelName, comment)].insert(set.begin(), set.end());
 	}
 }

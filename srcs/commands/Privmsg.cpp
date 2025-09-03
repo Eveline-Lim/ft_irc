@@ -37,7 +37,7 @@ void	Privmsg::execute(Server &server, std::string const &command, std::vector<Cl
 	{
 		count++;
 	}
-	if (count != 2)
+	if (count < 2)
 	{
 		output.insert(std::pair<std::string, std::set<int> >(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
 		return ;
@@ -47,6 +47,10 @@ void	Privmsg::execute(Server &server, std::string const &command, std::vector<Cl
 	std::string target;
 	std::string msg;
 	ss >> target >> msg;
+	// std::cout << "target: " << target << std::endl;
+	// std::cout << "args: " << args << std::endl;
+	// msg = args.substr(target.size() + 1, args.length());
+	// std::cout << "msg: | size: " << msg << msg.size() << std::endl;
 
 	// * cannot send to chan
 	// ? user away ?

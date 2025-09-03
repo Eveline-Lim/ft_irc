@@ -86,5 +86,4 @@ void User::execute(Server &server, std::string const &command, std::vector<Clien
 
 	std::cout << "USERNAME: " << (*it)->getUser() << std::endl;
 	std::cout << "REALNAME: " << (*it)->getReal() << std::endl;
-	server.FirstThreeCmdsTrue(it);
 }

@@ -131,10 +131,20 @@ bool Server::checkPoll(Server &server)
 					read_bytes = 0;
 					std::cout << "RECV here\n";
 					read_bytes = recv(fds[i].fd, buffer, sizeof(buffer), 0); // * 1er arg clientfd
+					std::cout << "buffer = " << buffer << std::endl;
 					if (read_bytes == 0)
 					{
 						std::cout << "client closed\n"; // QUIt et delete clients
-						closeFd();
+						std::cout << "FD SIZE = " << idClient.size() << std::endl;
+						std::cout << "I ========= " << i << std::endl;
+						for(size_t p = 0; p < idClient.size();p++)
+						{
+							if (idClient[p]->getFd() == fds[i].fd)
+							{
+								closeOneClient(idClient.begin() + p);
+								server.closeOnefds(fds[i].fd);
+							}
+						}
 					}
 					if (read_bytes == -1)
 					{
@@ -190,12 +200,35 @@ void	Server::closeFd() // fermeture SEULEMENT clients ! ne pas fermer pas le fd 
 	for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); ++it)
 	{
 		close((*it)->getFd());
+	}
+}
+
+void	Server::closeOneClient(std::vector<Client*>::iterator it)
+{
+		close((*it)->getFd());
+		// free (*it);
+		idClient.erase(it);
+}
+
+void	Server::freeClients()
+{
+	for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); ++it)
+	{
 		if (*it)
 			delete (*it);
 	}
 }
 
-void	Server::closeAllfd(int clientFd)
+void	Server::freeChannel()
+{
+	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		if (it->second)
+			delete (it->second);
+	}
+}
+
+void	Server::closeAllfd()
 {
 	// for (unsigned int i = 1; i < fds.size() ;i++)
 	// {
@@ -203,7 +236,24 @@ void	Server::closeAllfd(int clientFd)
 	// }
 	for (std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); ++it)
 	{
-		if (it->fd == clientFd)
+		// if (it->fd == clientFd)
+		// {
+			it = fds.erase(it);
+			break;
+		// }
+	}
+
+}
+
+void	Server::closeOnefds(int fd)
+{
+	// for (unsigned int i = 1; i < fds.size() ;i++)
+	// {
+	// 	close(fds[i].fd);
+	// }
+	for (std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); ++it)
+	{
+		if (it->fd == fd)
 		{
 			it = fds.erase(it);
 			break;
@@ -503,13 +553,13 @@ bool	Server::FirstThreeCmdsTrue(std::vector<Client*>::iterator it)
 
 	if ((*it)->isRegistered() == true)
 	{
-		std::cout << "nick: " << (*it)->getNick() << std::endl;
+		std::cout << "nick in User: " << (*it)->getNick() << std::endl;
 		response += RPL_WELCOME((*it)->getNick(), (*it)->getUser(), (*it)->getIp());
 		response += RPL_YOURHOST((*it)->getNick());
 		response += RPL_CREATED((*it)->getNick());
 		response += RPL_MYINFO((*it)->getNick(), "ircserv", "1.0", "itkol");
-		response += ":server MODE " + (*it)->getNick() + " +i\r\n";
-		// response += RPL_SUPPORT((*it)->getNick(), "ircserv", "itkol");
+		// response += ":server MODE " + (*it)->getNick() + " +i\r\n";
+		response += RPL_SUPPORT((*it)->getNick(), "ircserv", "itkol");
 		output.insert(std::pair<std::string, std::set<int> >(response, fds));
 		return (true);
 	}
@@ -531,4 +581,9 @@ void	Server::removeChannel(std::string const &chanName)
 	std::cout << "CHANNED REMOVED" << std::endl;
 	delete (it->second);
 	_channels.erase(it);
+}
+
+int	Server::getFD()
+{
+	return(_fdserver);
 }

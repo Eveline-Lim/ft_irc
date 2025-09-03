@@ -139,6 +139,7 @@ bool Channel::isClientInInvited(std::string const &nickname)
 
 void Channel::addClientToChannel(Client* client)
 {
+	std::cout << "ADDED" << std::endl;
 	_clients[client->getNick()] = client;
 	//std::cout << "client status: " << client->getStatus() << std::endl;
 }
@@ -358,6 +359,7 @@ std::set<int> Channel::noMsgforme(Client *client)
 	}
 	return (set);
 }
+
 // std::string Channel::getClient(std::string const &username) const
 // {
 // 	std::map<std::string, int>::const_iterator it = _clients.find(username);

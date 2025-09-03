@@ -23,7 +23,8 @@ void	Server::setSignal(void)
 	bzero(&act, sizeof(act));
 	act.sa_handler = sigintHandler;
 	sigaction(SIGINT, &act, NULL);
+	signal(SIGPIPE, SIG_IGN);
 	std::cout << "LALA" << std::endl;
 	closeFd();
-	close(_fdserver);  // where socket_fd is the one returned by `socket()`
+	// close(_fdserver);  // where socket_fd is the one returned by `socket()`
 }

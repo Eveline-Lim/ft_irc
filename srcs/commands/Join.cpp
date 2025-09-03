@@ -87,6 +87,12 @@ void Join::execute(Server &server, std::string const &command, std::vector<Clien
 		{
 			key = keys[i];
 			std::cout << "key: " << key << std::endl;
+			if (key == "x")
+			{
+				std::cout << "			KEY = x" << std::endl;
+				key.erase(0, 1);
+				std::cout << "after erase key: " << key << std::endl;
+			}
 		}
 
 		std::map<std::string, Channel*> &serverChannels = server.getChannels();
@@ -146,13 +152,8 @@ void Join::execute(Server &server, std::string const &command, std::vector<Clien
 		output.insert(std::pair<std::string, std::set<int> >(RPL_ENDOFNAME((*it)->getNick(), chan->getName()), fds));
 		output[RPL_JOIN((*it)->getNick(), (*it)->getUser(), "JOIN", chan->getName())].insert(set.begin(), set.end());
 
-		// output[RPL_JOIN((*it)->getNick(), (*it)->getUser(), "JOIN", chan->getName())].insert(set.begin(), set.end());
-		// 	output[RPL_TOPIC((*it)->getNick(), chan->getName(), chan->getTopic())].insert(set.begin(), set.end());
-		// output[RPL_NAMREPLY((*it)->getNick(), chan->getName(), chan->getClientsList())].insert(set.begin(), set.end());
-		//output[RPL_ENDOFNAME((*it)->getNick(),chan->getName())].insert(set.begin(), set.end());
 		/* **** DEBUG **** */
 		chan->displayMap();
-		
 		/* **************** */
 	}
 }

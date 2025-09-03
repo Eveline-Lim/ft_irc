@@ -1,4 +1,5 @@
 #include "../include/Server.hpp"
+#include "../include/Channel.hpp"
 
 int	main(int argc, char *argv[])
 {
@@ -10,6 +11,7 @@ int	main(int argc, char *argv[])
 	else
 	{
 		Server	server;
+		Channel chan;
 		std::cout << "----- Server -----" << std::endl;
 
 		try
@@ -21,12 +23,13 @@ int	main(int argc, char *argv[])
 		}
 		catch(const std::exception& e)
 		{
-			//server.closeFds();
 			std::cerr << e.what() << std::endl;
 		}
 		std::cout << "The server is closed" << std::endl;
 		server.closeFd();
-		// ! ne pas oublier de free ! 
+		server.freeClients();
+		server.freeChannel();
+		close(server.getFD());
 	}
 	return (0);
 }

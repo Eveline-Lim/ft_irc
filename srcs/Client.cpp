@@ -1,13 +1,13 @@
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
 
-Client::Client() : _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false)
+Client::Client() : _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false), _isNicknameSet(false)
 {
 	std::cout << "HERRRRE= " << _fd_client << std::endl;
 	;
 }
 
-Client::Client(int fd) : _fd_client(fd), _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false)
+Client::Client(int fd) : _fd_client(fd), _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false), _isNicknameSet(false)
 {
 
 }

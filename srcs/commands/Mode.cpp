@@ -215,6 +215,6 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 			// 	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " cannot change topic restriction\n", fds));
 			// }
 		}
-		// output[RPL_MODE((*it)->getNick(), (*it)->getUser(), ...)].insert((*it)->getFd());
+		output[RPL_MODE((*it)->getNick(), (*it)->getUser(), channelName, modes)].insert((*it)->getFd());
 	}
 }

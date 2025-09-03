@@ -122,8 +122,11 @@ void Invite::execute(Server &server, std::string const &command, std::vector<Cli
 		output.insert(std::pair<std::string, std::set<int> >(ERR_NOSUCHNICK((*it)->getNick(), targetNickname), fds));
 		return;
 	}
-
+	std::cout << "							targetclient: " << targetClient->getNick() << std::endl;
+	std::cout << "				channel:" << ite->second->getName() << std::endl;
+	std::cout << "		nom channel: " << channelName << std::endl;
+	ite->second->addClientToChannel((targetClient));
 	// Ajouter le client a la liste des invites du channel
-	ite->second->addInvitedClient(targetClient);
-	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " INVITE " + targetNickname + " :" + channelName, fds));
+	//ite->second->addInvitedClient(targetClient);
+	output[RPL_INVITING((*it)->getNick(), targetClient->getNick(), channelName)].insert((*it)->getFd());
 }

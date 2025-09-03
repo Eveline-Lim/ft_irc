@@ -64,6 +64,7 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 			if (ite->second->getClientList().size() == 0)
 			{
 				server.removeChannel(ite->second->getName());
+				server.removeClient(ite->second->getName());
 			}
 			ite = tmpIt;
 		}
