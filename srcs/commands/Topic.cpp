@@ -94,6 +94,8 @@ void Topic::execute(Server &server, std::string const &command, std::vector<Clie
 		{
 			ite->second->setTopic(topicSubject);
 			output[RPL_TOPIC((*it)->getNick(), channelName, topicSubject)].insert((*it)->getFd());
+			std::set<int> set = ite->second->noMsgforme(*it);
+			output[RPL_TOPIC((*it)->getNick(), channelName, topicSubject)].insert(set.begin(), set.end());
 		}
 	}
 }
