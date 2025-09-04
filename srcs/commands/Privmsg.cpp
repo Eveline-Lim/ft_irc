@@ -46,8 +46,17 @@ void	Privmsg::execute(Server &server, std::string const &command, std::vector<Cl
 	ss.seekg(0);
 	std::string target;
 	std::string msg;
-	ss >> target >> msg;
-	// std::cout << "target: " << target << std::endl;
+	ss >> target;
+	getline(ss, msg);
+	std::cout << "target: " << target << std::endl;
+	std::cout << "		MSG: " << msg << std::endl;
+	msg.erase(msg.size() - 1);
+	for (size_t i = 0; i < msg.length(); i++)
+	{
+		std::cout << "msg[i] = " << (int)msg[i] << std::endl;
+	}
+	std::cout << "----------------------------------------" << std::endl;
+
 	// std::cout << "args: " << args << std::endl;
 	// msg = args.substr(target.size() + 1, args.length());
 	// std::cout << "msg: | size: " << msg << msg.size() << std::endl;
@@ -81,8 +90,8 @@ void	Privmsg::execute(Server &server, std::string const &command, std::vector<Cl
 				else
 				{
 					nick = (*it)->getNick();
-					std::cout << "nick: " << nick << std::endl;
-					std::cout << "Sender: nick: " << nick << " | fd: " << (*it)->getFd() << std::endl;
+					// std::cout << "nick: " << nick << std::endl;
+					// std::cout << "Sender: nick: " << nick << " | fd: " << (*it)->getFd() << std::endl;
 				}
 				std::set<int> set = chan[target]->noMsgforme((*it));
 				std::cout << "user: " << (*it)->getUser() << std::endl;

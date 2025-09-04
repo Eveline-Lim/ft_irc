@@ -145,6 +145,7 @@ void Join::execute(Server &server, std::string const &command, std::vector<Clien
 		std::string names = chan->getClientsList();
 		std::cout << "names: " << names << std::endl;
 
+		
 		output.insert(std::pair<std::string, std::set<int> >(RPL_JOIN((*it)->getNick(), (*it)->getUser(), "JOIN", chan->getName()), fds));
 		if (!chan->getTopic().empty())
 			output.insert(std::pair<std::string, std::set<int> >(RPL_TOPIC((*it)->getNick(), chan->getName(), chan->getTopic()), fds));

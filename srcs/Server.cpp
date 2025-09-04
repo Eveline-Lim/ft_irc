@@ -131,7 +131,7 @@ bool Server::checkPoll(Server &server)
 					read_bytes = 0;
 					std::cout << "RECV here\n";
 					read_bytes = recv(fds[i].fd, buffer, sizeof(buffer), 0); // * 1er arg clientfd
-					std::cout << "buffer = " << buffer << std::endl;
+					// std::cout << "buffer = " << buffer << std::endl;
 					if (read_bytes == 0)
 					{
 						std::cout << "client closed\n"; // QUIt et delete clients
@@ -141,8 +141,10 @@ bool Server::checkPoll(Server &server)
 						{
 							if (idClient[p]->getFd() == fds[i].fd)
 							{
-								closeOneClient(idClient.begin() + p);
+								idClient[p]->setSuppressed(true);
+								close(idClient[p]->getFd());
 								server.closeOnefds(fds[i].fd);
+								closeOneClient(idClient.begin() + p);
 							}
 						}
 					}
@@ -153,10 +155,10 @@ bool Server::checkPoll(Server &server)
 					}
 					else
 					{
-						std::cout<<"?????????????????????????????????????????????"<<std::endl;
+						// std::cout<<"?????????????????????????????????????????????"<<std::endl;
 						for (std::vector<Client*>::iterator it = idClient.begin(); it != idClient.end(); it++)
 						{
-							if ((*it)->getFd() == fds[i].fd)
+							if ((*it)->getFd() == fds[i].fd && !(*it)->getIsSuppressed())
 							{
 								std::cout << "BUFFFFFFFFFFFFFFF = " << buffer << std::endl;
 								(*it)->setInput(buffer);
@@ -170,6 +172,16 @@ bool Server::checkPoll(Server &server)
 				}
 			}
 		}
+		for (std::vector<Client*>::iterator it = idClient.begin(); it != idClient.end() && idClient.size() > 0; it++)
+		{
+			if ((*it)->getIsSuppressed())
+			{
+				Client *tmp = *it;
+				delete tmp;
+				idClient.erase(it);
+				it = idClient.begin();
+			}
+		}
 		sendMessage();
 		for (std::vector<Client*>::iterator it = idClient.begin(); it != idClient.end(); it++)
 		{
@@ -178,6 +190,17 @@ bool Server::checkPoll(Server &server)
 			if ((*it)->getInput(res) == true)
 				executeCommands((char *)res.c_str(), server, it);
 		}
+		// for (std::vector<Client*>::iterator it = idClient.begin(); it != idClient.end() && idClient.size() > 0; it++)
+		// {
+		// 	if ((*it)->getIsSuppressed())
+		// 	{
+		// 		Client *tmp = *it;
+		// 		delete tmp;
+		// 		idClient.erase(it);
+		// 		it = idClient.begin();
+		// 		closeOnefds((*it)->getFd());
+		// 	}
+		// }
 	}
 	return (true);
 }
@@ -193,10 +216,6 @@ void	Server::deleteClients(int index)
 void	Server::closeFd() // fermeture SEULEMENT clients ! ne pas fermer pas le fd du server
 {
 	std::cout << "ICI" << std::endl;
-	// for (unsigned int i = 0; i < idClient.size() ;i++)
-	// {
-	// 	close(idClient[i]->getFd());
-	// }
 	for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); ++it)
 	{
 		close((*it)->getFd());
@@ -206,8 +225,8 @@ void	Server::closeFd() // fermeture SEULEMENT clients ! ne pas fermer pas le fd 
 void	Server::closeOneClient(std::vector<Client*>::iterator it)
 {
 		close((*it)->getFd());
-		// free (*it);
 		idClient.erase(it);
+		// delete (*it);
 }
 
 void	Server::freeClients()
@@ -228,29 +247,21 @@ void	Server::freeChannel()
 	}
 }
 
-void	Server::closeAllfd()
+void	Server::closeAllfd(int fd)
 {
-	// for (unsigned int i = 1; i < fds.size() ;i++)
-	// {
-	// 	close(fds[i].fd);
-	// }
 	for (std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); ++it)
 	{
-		// if (it->fd == clientFd)
-		// {
+		if (it->fd == fd)
+		{
 			it = fds.erase(it);
 			break;
-		// }
+		}
 	}
 
 }
 
 void	Server::closeOnefds(int fd)
 {
-	// for (unsigned int i = 1; i < fds.size() ;i++)
-	// {
-	// 	close(fds[i].fd);
-	// }
 	for (std::vector<struct pollfd>::iterator it = fds.begin(); it != fds.end(); ++it)
 	{
 		if (it->fd == fd)
@@ -284,6 +295,7 @@ void	Server::newClient()
 	std::string client_ip = inet_ntoa(client_addr.sin_addr);
 	Client *newclient = new Client(_newfdclient);
 	idClient.push_back(newclient);
+
 	newclient->setIp(client_ip);
 	clientpoll.fd = _newfdclient;
 	clientpoll.events = POLLIN;
@@ -293,6 +305,7 @@ void	Server::newClient()
 	std::cout << "IP ADD" << newclient->getIp() << std::endl;
 	std::cout << "FD COUNT FTER CLIENT" << _fdcount << std::endl;
 	// ! Ne pas oublier de close ! ne pas close dans le destructeur
+
 }
 
 int Server::isCommand(const char *str)
@@ -527,7 +540,7 @@ void Server::removeClient(std::string const &nickname)
 	{
 		if ((*it)->getNick() == nickname)
 		{
-			idClient.erase(it);
+			it = idClient.erase(it);
 			break ;
 		}
 	}

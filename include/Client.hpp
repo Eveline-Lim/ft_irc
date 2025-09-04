@@ -49,6 +49,8 @@ class Client
 		int &getStatus(void);
 		bool getUse();
 		bool getIsNicknameSet(void);
+		bool getIsSuppressed(void);
+
 		// std::vector<std::string>&displayClientsInChannels(void);
 
 		void setNick(std::string);
@@ -61,6 +63,7 @@ class Client
 		void setStatus(int status);
 		void setInput(char buffer[1024]);
 		void setIsNicknameSet(bool isSet);
+		void setSuppressed(bool toBeSuppressed);
 
 		bool tryRegister(void);
 		bool isRegistered(void);
@@ -78,6 +81,7 @@ class Client
 		bool	_used;
 		bool	_registered;
 		bool	_isNicknameSet;
+		bool	_suppressed;
 		std::vector<char> in;
 };
 

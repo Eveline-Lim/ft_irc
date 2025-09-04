@@ -8,6 +8,8 @@
 #include <map>
 #include <set>
 
+class Server;
+
 class Client;
 
 class Channel
@@ -60,7 +62,7 @@ class Channel
 		bool	modeI(std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg);
 		bool	modeK(std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg, std::string &password);
 		bool	modeL(std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg, int &limit);
-		bool	modeO(std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg, std::string &targetUser);
+		bool	modeO(Server &server, std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg, std::string &targetUser);
 		bool	modeT(std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg);
 
 	private:

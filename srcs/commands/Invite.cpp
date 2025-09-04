@@ -36,7 +36,7 @@ void Invite::execute(Server &server, std::string const &command, std::vector<Cli
 	}
 	if (count < 2)
 	{
-		output.insert(std::pair<std::string, std::set<int> >(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+		output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
 		return ;
 	}
 
@@ -49,7 +49,7 @@ void Invite::execute(Server &server, std::string const &command, std::vector<Cli
 	std::cout << "channelName: " << channelName << std::endl;
 	if (!((*it))->tryJoinChannel())
 	{
-		output.insert(std::pair<std::string, std::set<int> >("Client must register to access to channels\r\n", fds));
+		output[ERR_NOTREGISTERED((*it)->getNick())].insert((*it)->getFd());
 		return ;
 	}
 	if (targetNickname.size() > 10)
@@ -94,16 +94,24 @@ void Invite::execute(Server &server, std::string const &command, std::vector<Cli
 
 	if (ite == channels.end())
 	{
-		output.insert(std::pair<std::string, std::set<int> >(ERR_NOSUCHCHANNEL((*it)->getNick(), channelName), fds));
-		return;
-	}
-	// Verifier que l’emetteur est operateur du channel
-	if (!ite->second->isOperator((*it)->getNick()))
-	{
-		output.insert(std::pair<std::string, std::set<int> >(ERR_CHANOPRIVISNEEDED((*it)->getNick(), channelName), fds));
+		output[ERR_NOSUCHCHANNEL((*it)->getNick(), channelName)].insert((*it)->getFd());
 		return;
 	}
 
+	 Channel *channel = ite->second;
+	// Verifier que l’emetteur est operateur du channel
+	if (!channel->isOperator((*it)->getNick()))
+	{
+		output[ERR_CHANOPRIVISNEEDED((*it)->getNick(), channelName)].insert((*it)->getFd());
+		return;
+	}
+
+	// Vérifier opérateur si channel est en mode +i
+	// if (channel->isInviteOnly() && !channel->isOperator((*it)->getNick()))
+	// {
+		// output[ERR_CHANOPRIVISNEEDED((*it)->getNick(), channelName)] = fds;
+		// return;
+	// }
 	// Verifier que le client cible existe dans le serveur
 	std::vector<Client*> clients = server.getClients();
 	Client *targetClient = NULL;
@@ -119,14 +127,15 @@ void Invite::execute(Server &server, std::string const &command, std::vector<Cli
 
 	if (!targetClient)
 	{
-		output.insert(std::pair<std::string, std::set<int> >(ERR_NOSUCHNICK((*it)->getNick(), targetNickname), fds));
+		output[ERR_NOSUCHNICK((*it)->getNick(), targetNickname)].insert((*it)->getFd());
 		return;
 	}
 	std::cout << "							targetclient: " << targetClient->getNick() << std::endl;
-	std::cout << "				channel:" << ite->second->getName() << std::endl;
+	std::cout << "				channel:" << channel->getName() << std::endl;
 	std::cout << "		nom channel: " << channelName << std::endl;
-	ite->second->addClientToChannel((targetClient));
+	channel->addClientToChannel((targetClient));
 	// Ajouter le client a la liste des invites du channel
-	//ite->second->addInvitedClient(targetClient);
+	channel->addInvitedClient(targetClient);
 	output[RPL_INVITING((*it)->getNick(), targetClient->getNick(), channelName)].insert((*it)->getFd());
+	output[RPL_INVITING((*it)->getNick(), targetClient->getNick(), channelName)].insert(targetClient->getFd());
 }

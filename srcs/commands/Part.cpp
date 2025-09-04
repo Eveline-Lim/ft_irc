@@ -34,19 +34,26 @@ void Part::execute(Server &server, std::string const &command, std::vector<Clien
 
 	if (!((*it))->tryJoinChannel())
 	{
-		output.insert(std::pair<std::string, std::set<int> >("Client must register to access to channels\r\n", fds));
+		output[ERR_NOTREGISTERED((*it)->getNick())].insert((*it)->getFd());
 		return ;
 	}
 	if (channelsStr.empty())
 	{
-		output.insert(std::pair<std::string, std::set<int> >(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+		output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
 		return;
 	}
-
-	// Recuperer le message optionnel (commentaire)
 	std::string comment;
-	// std::getline(ss, comment);
-	ss >> comment;
+	std::getline(ss, comment);
+	if (!comment.empty() && comment[0] == ' ')
+	{
+		comment.erase(0, 1);
+	}
+	if (!comment.empty() && comment[0] == ':')
+	{
+		comment.erase(0, 1);
+	}
+	comment.erase(comment.size() - 1);
+
 	std::cout << "comment: " << comment << std::endl;
 
 	std::vector<std::string> channels = ACommand::splitAndTrim(channelsStr);
@@ -59,7 +66,7 @@ void Part::execute(Server &server, std::string const &command, std::vector<Clien
 		// Verifier que le channel commence par # ou &
 		if ((channelName[0] != '#' && channelName[0] != '&'))
 		{
-			output.insert(std::pair<std::string, std::set<int> >(ERR_BADCHANMASK((*it)->getNick(), channelName), fds));
+			output[ERR_BADCHANMASK((*it)->getNick(), channelName)].insert((*it)->getFd());
 			return ;
 		}
 
@@ -68,7 +75,7 @@ void Part::execute(Server &server, std::string const &command, std::vector<Clien
 		std::map<std::string, Channel*>::iterator ite = serverChannels.find(channelName);
 		if (ite == serverChannels.end())
 		{
-			output.insert(std::pair<std::string, std::set<int> >(ERR_NOSUCHCHANNEL((*it)->getNick(), channelName), fds));
+			output[ERR_NOSUCHCHANNEL((*it)->getNick(), channelName)].insert((*it)->getFd());
 			return ;
 		}
 
@@ -77,17 +84,17 @@ void Part::execute(Server &server, std::string const &command, std::vector<Clien
 		// Verifier que le client est dans le channel
 		if (!chan->isClientInChannel((*it)->getNick()))
 		{
-			output.insert(std::pair<std::string, std::set<int> >(ERR_NOTONCHANNEL((*it)->getNick(), channelName), fds));
+			output[ERR_NOTONCHANNEL((*it)->getNick(), channelName)].insert((*it)->getFd());
 			return ;
 		}
 
 		// Supprimer le client du channel
 		chan->removeClientFromChannel((*it)->getNick());
-		std::cout << (*it)->getNick() << " left " << channelName;
-		if (!comment.empty())
-		{
-			std::cout << " (" << comment << ")" << std::endl;
-		}
+		// std::cout << (*it)->getNick() << " left " << channelName;
+		// if (!comment.empty())
+		// {
+		// 	std::cout << " (" << comment << ")" << std::endl;
+		// }
 
 		// Envoyer message PART au client
 		std::set<int> set = chan->noMsgforme((*it));

@@ -33,8 +33,6 @@
 
 #endif
 
-
-
 /*
 std::string joinMsg = ":" + (*it)->getNick() + "!~" + (*it)->getUser() + "@host JOIN :" + chan->getName() + "\r\n";
 std::string topicMsg = "332 " + (*it)->getNick() + " " + chan->getName() + " :" + chan->getTopic() + "\r\n";

@@ -1,13 +1,13 @@
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
 
-Client::Client() : _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false), _isNicknameSet(false)
+Client::Client() : _fd_client(0), _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false), _isNicknameSet(false), _suppressed(false)
 {
 	std::cout << "HERRRRE= " << _fd_client << std::endl;
 	;
 }
 
-Client::Client(int fd) : _fd_client(fd), _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false), _isNicknameSet(false)
+Client::Client(int fd) : _fd_client(fd), _nickname(""), _username(""), _realname(""), _password(""), _ip_add(""), _status(-1), _used(false), _registered(false), _isNicknameSet(false), _suppressed(false)
 {
 
 }
@@ -23,6 +23,7 @@ Client::Client(const Client &obj)
 	this->_status = obj._status;
 	this->_used = obj._used;
 	this->_registered = obj._registered;
+	this->_suppressed = obj._suppressed;
 }
 
 Client &Client::operator=(Client const &obj)
@@ -36,6 +37,7 @@ Client &Client::operator=(Client const &obj)
 	this->_status = obj._status;
 	this->_used = obj._used;
 	this->_registered = obj._registered;
+	this->_suppressed = obj._suppressed;
 	return (*this);
 }
 
@@ -87,6 +89,11 @@ bool Client::getUse()
 bool	Client::getIsNicknameSet(void)
 {
 	return (_isNicknameSet);
+}
+
+bool Client::getIsSuppressed(void)
+{
+	return (_suppressed);
 }
 
 void Client::setNick(std::string nickname)
@@ -157,6 +164,11 @@ bool Client::isRegistered(void)
 	return (_registered);
 }
 
+void Client::setSuppressed(bool toBeSuppressed)
+{
+	this->_suppressed = toBeSuppressed;
+}
+
 bool Client::tryJoinChannel(void)
 {
 	std::cout << "password: " << _password << std::endl;
@@ -181,7 +193,8 @@ void Client::setInput(char buffer[1024])
 	in.insert(in.end(), buffer, buffer + strlen(buffer));
 }
 
-bool Client::getInput(std::string &response){
+bool Client::getInput(std::string &response)
+{
 	std::vector<char>::iterator index = std::find(in.begin(), in.end(), '\n');
 	if (index == in.end())
 		return false;

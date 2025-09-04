@@ -171,7 +171,16 @@ std::string Channel::getClientsList(void)
 	std::string clientsList;
 	for (std::map<std::string, Client *>::iterator clientsIt = _clients.begin(); clientsIt != _clients.end(); clientsIt++)
 	{
-		clientsList += clientsIt->second->getNick() + " ";
+		std::string nick;
+		if (clientsIt->second->getStatus() == OPERATOR)
+		{
+			nick = "@" + clientsIt->second->getNick() + " ";
+			clientsList += nick;
+		}
+		else
+		{
+			clientsList += clientsIt->second->getNick() + " ";
+		}
 	}
 	return (clientsList);
 }
@@ -267,12 +276,15 @@ bool Channel::modeL(std::string const &client, std::map<std::string, Channel*>::
 	return (true);
 }
 
-bool Channel::modeO(std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg, std::string &targetUser)
+bool Channel::modeO(Server &server, std::string const &client, std::map<std::string, Channel*>::iterator ite, std::string const &arg, std::string &targetUser)
 {
 	(void)ite;
 	std::map<std::string, Client*>::iterator it = _clients.find(client);
 	std::map<std::string, Client*>::iterator iter = _clients.find(targetUser);
 
+	std::set<int> fds;
+	fds.insert(iter->second->getFd());
+	std::map<std::string, std::set<int> > &output = server.getOutput();
 	if (it == _clients.end() || (iter == _clients.end()))
 	{
 		return (false);
@@ -285,6 +297,10 @@ bool Channel::modeO(std::string const &client, std::map<std::string, Channel*>::
 	{
 		iter->second->setStatus(OPERATOR);
 		std::cout << "Client granted operator role" << std::endl;
+		std::cout << "			nick: " << iter->second->getNick() << std::endl;
+		output.insert(std::pair<std::string, std::set<int> >(RPL_YOUREOPER(iter->second->getNick()), fds));
+		// std::set<int> set = ite->second->noMsgforme(it->second);
+		// output[RPL_YOUREOPER(iter->second->getNick())].insert(set.begin(), set.end());
 	}
 	else
 	{

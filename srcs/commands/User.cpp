@@ -37,11 +37,11 @@ void User::execute(Server &server, std::string const &command, std::vector<Clien
 	}
 	std::cout << " FD = " << (*it)->getUse() << std::endl;
 	std::cerr << "COUNT WORD = " << count << std::endl;
-	// if (count != 4)//irssi vous en comptez 5
-	// {
-	// 	output.insert(std::pair<std::string, std::set<int> >(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
-	// 	return ;
-	// }
+	if (count != 5)//irssi vous en comptez 5
+	{
+		output.insert(std::pair<std::string, std::set<int> >(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+		return ;
+	}
 
 	ss.clear();
 	ss.seekg(0);
@@ -83,7 +83,7 @@ void User::execute(Server &server, std::string const &command, std::vector<Clien
 		(*it)->setReal(realname);
 		(*it)->setUse(true);
 	}
-
+	// server.FirstThreeCmdsTrue(it);
 	std::cout << "USERNAME: " << (*it)->getUser() << std::endl;
 	std::cout << "REALNAME: " << (*it)->getReal() << std::endl;
 }

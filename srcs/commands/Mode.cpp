@@ -39,20 +39,19 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 
 	if (!((*it))->tryJoinChannel())
 	{
-		output.insert(std::pair<std::string, std::set<int> >("Client must register to access to channels\r\n", fds));
+		output[ERR_NOTREGISTERED((*it)->getNick())].insert((*it)->getFd());
 		return ;
 	}
 	if (channelName.empty() || modes.empty())
 	{
-		output.insert(std::make_pair(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+		output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
 		return;
 	}
 	if (channelName[0] != '#' && channelName[0] != '&')
 	{
 		if ((*it)->getNick() == channelName)
 			return ;
-		std::cerr << "Error: Channel name must start with # or &" << std::endl;
-		output.insert(std::pair<std::string, std::set<int> >(ERR_BADCHANMASK((*it)->getNick(), channelName), fds));
+		output[ERR_BADCHANMASK((*it)->getNick(), channelName)].insert((*it)->getFd());
 		return ;
 	}
 
@@ -61,13 +60,13 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 
 	if (chanIt == channels.end())
 	{
-		output.insert(std::make_pair(ERR_NOSUCHCHANNEL((*it)->getNick(), channelName), fds));
+		output[ERR_NOSUCHCHANNEL((*it)->getNick(), channelName)].insert((*it)->getFd());
 		return;
 	}
 
 	if (!chanIt->second->isOperator((*it)->getNick()))
 	{
-		output.insert(std::make_pair(ERR_CHANOPRIVISNEEDED((*it)->getNick(), channelName), fds));
+		output[ERR_CHANOPRIVISNEEDED((*it)->getNick(), channelName)].insert((*it)->getFd());
 		return;
 	}
 
@@ -98,7 +97,8 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 			&& modeFlag != "l" && modeFlag != "+l" && modeFlag != "-l" && modeFlag != "o" && modeFlag != "+o" && modeFlag != "-o" \
 			&& modeFlag != "t" && modeFlag != "+t" && modeFlag != "-t")
 		{
-			output.insert(std::make_pair("Unknown mode flag: " + modeFlag + "\n", fds));
+			output[ERR_UNKNOWNMODEFLAG((*it)->getNick())].insert((*it)->getFd());
+			return ;
 		}
 
 		if (modeFlag == "i")
@@ -108,15 +108,6 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 		if (modeFlag == "+i" || modeFlag == "-i")
 		{
 			chanIt->second->modeI((*it)->getNick(), chanIt, modeFlag);
-			// if (chanIt->second->modeI((*it)->getNick(), chanIt, modeFlag))
-			// {
-			// 	std::cout << "Invite mode set to" <<  chanIt->second->isInviteOnly() << std::endl;
-			// 	output.insert(std::pair<std::string, std::set<int> >("Invite mode set to " + chanIt->second->isInviteOnly(), fds));
-			// }
-			// else
-			// {
-			// 	output.insert(std::pair<std::string, std::set<int> >(ERR_NOSUCHCHANNEL((*it)->getNick(), channelName), fds));
-			// }
 		}
 
 		if (modeFlag == "k")
@@ -130,22 +121,13 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 			{
 				if (params.empty())
 				{
-					output.insert(std::make_pair(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+					output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
 					return ;
 				}
 				password = params.front();
 				params.pop();
 			}
 			chanIt->second->modeK((*it)->getNick(), chanIt, modeFlag, password);
-			// if (chanIt->second->modeK((*it)->getNick(), chanIt, modeFlag, password))
-			// {
-			// 	std::cout << "new password: " << password << std::endl;
-			// 	output.insert(std::pair<std::string, std::set<int> >( "Channel key has been changed\n", fds));
-			// }
-			// else
-			// {
-			// 	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " cannot change channel key\n", fds));
-			// }
 		}
 		if (modeFlag == "l")
 		{
@@ -158,22 +140,13 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 			{
 				if (params.empty())
 				{
-					output.insert(std::make_pair(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+					output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
 					return ;
 				}
 				limit = atoi(params.front().c_str());
 				params.pop();
 			}
 			chanIt->second->modeL((*it)->getNick(), chanIt, modeFlag, limit);
-			// if (chanIt->second->modeL((*it)->getNick(), chanIt, modeFlag, limit))
-			// {
-			// 	std::cout << "User " << (*it)->getNick() << " limited the channel to " << chanIt->second->getLimit() << " user(s)\n" << std::endl;
-			// 	// output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " limited the channel to " + chanIt->second->getLimit() + " user(s)\n", fds));
-			// }
-			// else
-			// {
-			// 	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " cannot change user limit", fds));
-			// }
 		}
 		if (modeFlag == "o")
 		{
@@ -183,21 +156,13 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 		{
 			if (params.empty())
 			{
-				output.insert(std::make_pair(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
+				output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
 				return ;
 			}
 			std::string target = params.front();
 			params.pop();
 
-			chanIt->second->modeO((*it)->getNick(), chanIt, modeFlag, target);
-			// if (chanIt->second->modeO((*it)->getNick(), chanIt, modeFlag, target))
-			// {
-			// 	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " granted " + target + "the operator role\n", fds));
-			// }
-			// else
-			// {
-			// 	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " cannot change channel operator privilege\n", fds));
-			// }
+			chanIt->second->modeO(server, (*it)->getNick(), chanIt, modeFlag, target);
 		}
 		if (modeFlag == "t")
 		{
@@ -206,14 +171,6 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 		if (modeFlag == "+t" || modeFlag == "-t")
 		{
 			chanIt->second->modeT((*it)->getNick(), chanIt, modeFlag);
-			// if (chanIt->second->modeT((*it)->getNick(), chanIt, modeFlag))
-			// {
-			// 	std::cout << "User " << (*it)->getNick() << " changed topic restrictions to " << chanIt->second->isTopicRestricted() << std::endl;
-			// }
-			// else
-			// {
-			// 	output.insert(std::pair<std::string, std::set<int> >((*it)->getNick() + " cannot change topic restriction\n", fds));
-			// }
 		}
 		output[RPL_MODE((*it)->getNick(), (*it)->getUser(), channelName, modes)].insert((*it)->getFd());
 	}

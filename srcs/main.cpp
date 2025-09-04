@@ -20,6 +20,7 @@ int	main(int argc, char *argv[])
 			server.checkArgs(argv);
 			server.initServer(server);
 			server.checkPoll(server);
+			
 		}
 		catch(const std::exception& e)
 		{
@@ -27,9 +28,9 @@ int	main(int argc, char *argv[])
 		}
 		std::cout << "The server is closed" << std::endl;
 		server.closeFd();
-		server.freeClients();
-		server.freeChannel();
 		close(server.getFD());
+		server.freeChannel();
+		server.freeClients();
 	}
 	return (0);
 }

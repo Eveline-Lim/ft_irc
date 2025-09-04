@@ -103,7 +103,7 @@ class Server
 		bool	FirstThreeCmdsTrue(std::vector<Client*>::iterator it);
 		void	ping(std::vector<Client*>::iterator it);
 		int 	getClientFd(std::string const &nickname);
-		void	closeAllfd();
+		void	closeAllfd(int fd);
 		void	removeChannel(std::string const &chanName);
 		void	freeClients();
 		int		getFD();
