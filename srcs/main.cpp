@@ -28,9 +28,9 @@ int	main(int argc, char *argv[])
 		}
 		std::cout << "The server is closed" << std::endl;
 		server.closeFd();
-		close(server.getFD());
 		server.freeChannel();
 		server.freeClients();
+		close(server.getFD());
 	}
 	return (0);
 }

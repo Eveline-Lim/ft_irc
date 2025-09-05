@@ -54,6 +54,8 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 		{
 			std::string msg;
 			std::set<int> set = chan->noMsgforme((*it));
+			// std::map<std::string, Channel*>::iterator tmpIt = ite;
+			// ++tmpIt;
 			if (!quitMessage.empty())
 			{
 				msg = ":" + (*it)->getNick() + "!~" + (*it)->getUser() + "@server QUIT :Quit " + quitMessage + "\r\n";
@@ -65,14 +67,12 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 			output[msg].insert(set.begin(), set.end());
 			chan->removeClientFromChannel((*it)->getNick());
 
-			std::map<std::string, Channel*>::iterator tmpIt = ite;
-			std::cout << "tmpIt:" <<  tmpIt->first << std::endl;
-			++tmpIt;
+			// std::cout << "tmpIt:" <<  tmpIt->first << std::endl;
 			if (chan->getClientList().size() == 0)
-			{
 				server.removeChannel(chan->getName());
-			}
-			ite = tmpIt;
+			else
+				++ite;
+			// ite = tmpIt;
 		}
 		else
 		{
@@ -80,6 +80,7 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 		}
 	}
 	server.closeAllfd((*it)->getFd());
+	// server.removeClient((*it)->getNick());
 
 	// close((*it)->getFd());
 	// (*it)->setSuppressed(true);
@@ -93,7 +94,6 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 	// }
 
 	// Remove client from server
-	// server.removeClient((*it)->getNick());
 
 	// server.closeFd();
 	// server.closeAllfd((*it)->getFd());

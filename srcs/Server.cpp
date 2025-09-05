@@ -46,6 +46,7 @@ Server &Server::operator=(Server const &obj)
 Server::~Server()
 {
 	//* gerer les fermeture de fd
+	// this->idClient.clear();
 }
 
 std::string const &Server::getPassword(void) const
@@ -231,11 +232,17 @@ void	Server::closeOneClient(std::vector<Client*>::iterator it)
 
 void	Server::freeClients()
 {
-	for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); ++it)
-	{
-		if (*it)
-			delete (*it);
-	}
+	// for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); ++it)
+	// {
+	// 	if (*it)
+	// 		delete (*it);
+	// }
+	// idClient.clear();
+	for (size_t i = 0; i < idClient.size(); ++i)
+    {
+        delete idClient[i];
+    }
+    idClient.clear();
 }
 
 void	Server::freeChannel()
@@ -534,13 +541,13 @@ std::vector<Client*> Server::getClientId()
 
 void Server::removeClient(std::string const &nickname)
 {
-	std::vector<Client *>::iterator it;
 
-	for (it = idClient.begin(); it != idClient.end(); it++)
+	for (std::vector<Client *>::iterator it = idClient.begin(); it != idClient.end(); it++)
 	{
 		if ((*it)->getNick() == nickname)
 		{
-			it = idClient.erase(it);
+			delete *it;
+			idClient.erase(it);
 			break ;
 		}
 	}
