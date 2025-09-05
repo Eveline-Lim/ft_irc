@@ -50,6 +50,8 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 	std::map<std::string, Channel*> &channels = server.getChannels();
 	for (std::map<std::string, Channel*>::iterator ite = channels.begin(); ite != channels.end(); )
 	{
+		std::cout<<"size "<<channels.size()<<std::endl;
+		std::cout<<"distance "<<std::distance(channels.begin(), ite)<<std::endl;
 		Channel *chan = ite->second;
 		if (chan->isClientInChannel((*it)->getNick()))
 		{
@@ -66,7 +68,7 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 			output[msg].insert(set.begin(), set.end());
 			chan->removeClientFromChannel((*it)->getNick());
 			if (chan->getClientList().size() == 0)
-				server.removeChannel(chan->getName());
+				ite = server.removeChannel(chan->getName());
 			else
 				++ite;
 		}
@@ -75,7 +77,9 @@ void Quit::execute(Server &server, std::string const &command, std::vector<Clien
 			++ite;
 		}
 	}
+	std::cout<<"size "<<channels.size()<<std::endl;
 	server.closeAllfd((*it)->getFd());
+	std::cout<<"???????????????????????????????????????????????"<<std::endl;
 	// server.removeClient((*it)->getNick());
 
 	// close((*it)->getFd());

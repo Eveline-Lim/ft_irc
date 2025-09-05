@@ -117,8 +117,9 @@ bool Channel::isInvited(std::string const &nickname)
 bool Channel::isClientInChannel(std::string const &nickname)
 {
 	std::cout << "nickname: " << nickname << std::endl;
+	std::cout<<"nb clients : "<<_clients.size()<<std::endl;
 	std::map<std::string, Client*>::iterator it = _clients.find(nickname);
-
+	std::cout<<"it : "<<std::distance(_clients.begin(), it)<<std::endl;
 	if (it != _clients.end())
 	{
 		return (true);

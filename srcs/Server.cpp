@@ -221,6 +221,7 @@ void	Server::closeFd() // fermeture SEULEMENT clients ! ne pas fermer pas le fd 
 	{
 		close((*it)->getFd());
 	}
+	std::cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<std::endl;
 }
 
 void	Server::closeOneClient(std::vector<Client*>::iterator it)
@@ -595,12 +596,18 @@ void	Server::ping(std::vector<Client*>::iterator it)
 	output.insert(std::pair<std::string, std::set<int> >("PONG\r\n", fds));
 }
 
-void	Server::removeChannel(std::string const &chanName)
+std::map<std::string, Channel *>::iterator	Server::removeChannel(std::string const &chanName)
 {
-	std::map<std::string, Channel *>::iterator it = _channels.find(chanName);
-	std::cout << "CHANNED REMOVED" << std::endl;
-	delete (it->second);
-	_channels.erase(it);
+    std::map<std::string, Channel *>::iterator it = _channels.find(chanName);
+    if (it == _channels.end())
+        return _channels.end();
+    std::map<std::string, Channel *>::iterator next = it;
+    ++next;
+
+    delete it->second;
+    _channels.erase(it);
+
+    return next;
 }
 
 int	Server::getFD()
