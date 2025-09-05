@@ -88,15 +88,7 @@ void Part::execute(Server &server, std::string const &command, std::vector<Clien
 			return ;
 		}
 
-		// Supprimer le client du channel
 		chan->removeClientFromChannel((*it)->getNick());
-		// std::cout << (*it)->getNick() << " left " << channelName;
-		// if (!comment.empty())
-		// {
-		// 	std::cout << " (" << comment << ")" << std::endl;
-		// }
-
-		// Envoyer message PART au client
 		std::set<int> set = chan->noMsgforme((*it));
 		output[RPL_PART((*it)->getNick(), (*it)->getUser(), command, channelName, comment)].insert(set.begin(), set.end());
 	}

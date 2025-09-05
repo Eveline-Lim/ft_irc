@@ -75,17 +75,24 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 
 	while (ss >> param)
 	{
+		std::cout << "			AVANT param: " << param << std::endl;
+		if (!param.empty() && param[param.size() - 1] == ',')
+		{
+			param.erase(param.size() - 1, 1);
+		}
 		params.push(param);
-		std::cout << "param: " << param << std::endl;
+		std::cout << "		AFTER param: " << param << std::endl;
 	}
 
+	bool valid = true;
+	std::cout << "			modes: " << modes << std::endl;
 	for (std::string::size_type i = 0; i < modes.size(); ++i)
 	{
 		char c = modes[i];
 		if (c == '+' || c == '-')
 		{
 			operation = c;
-			continue;
+			continue ;
 		}
 
 		std::string modeFlag;
@@ -98,7 +105,8 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 			&& modeFlag != "t" && modeFlag != "+t" && modeFlag != "-t")
 		{
 			output[ERR_UNKNOWNMODEFLAG((*it)->getNick())].insert((*it)->getFd());
-			return ;
+			valid = false;
+			break ;
 		}
 
 		if (modeFlag == "i")
@@ -122,6 +130,7 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 				if (params.empty())
 				{
 					output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
+					//valid = false; break ;
 					return ;
 				}
 				password = params.front();
@@ -141,6 +150,7 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 				if (params.empty())
 				{
 					output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
+					//valid = false; break ;
 					return ;
 				}
 				limit = atoi(params.front().c_str());
@@ -157,6 +167,7 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 			if (params.empty())
 			{
 				output[ERR_NEEDMOREPARAMS((*it)->getNick())].insert((*it)->getFd());
+					//valid = false; break ;
 				return ;
 			}
 			std::string target = params.front();
@@ -172,6 +183,12 @@ void Mode::execute(Server &server, std::string const &command, std::vector<Clien
 		{
 			chanIt->second->modeT((*it)->getNick(), chanIt, modeFlag);
 		}
+	}
+
+	if (valid)
+	{
 		output[RPL_MODE((*it)->getNick(), (*it)->getUser(), channelName, modes)].insert((*it)->getFd());
+		std::set<int> set = chanIt->second->noMsgforme((*it));
+		output[RPL_MODE((*it)->getNick(), (*it)->getUser(), channelName, modes)].insert(set.begin(), set.end());
 	}
 }

@@ -26,25 +26,23 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 	std::cout << "Entering " << command << " command" << std::endl;
 
 	std::stringstream ss(args);
-	std::string channelsStr, usersStr, comment;
+	std::string channelsStr;
+	std::string usersStr;
 	ss >> channelsStr >> usersStr;
-	ss >> comment;
 
+	std::string comment;
+	std::getline(ss, comment);
+	if (!comment.empty() && comment[0] == ' ')
+	{
+		comment = comment.substr(1);
+		comment.erase(comment.size() - 1);
+
+	}
 	if (!comment.empty() && comment[0] == ':')
 	{
 		comment = comment.substr(1);
+		comment.erase(comment.size() - 1);
 	}
-
-	// std::string comment;
-	// std::getline(ss, comment);
-	// if (!comment.empty() && comment[0] == ' ')
-	// {
-	// 	comment = comment.substr(1);
-	// }
-	// if (!comment.empty() && comment[0] == ':')
-	// {
-	// 	comment = comment.substr(1);
-	// }
 	std::set<int> fds;
 	fds.insert((*it)->getFd());
 	std::map<std::string, std::set<int> > &output = server.getOutput();
@@ -86,10 +84,10 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 			return;
 		}
 
-		for (size_t i = 0; i < users.size(); ++i)
+		for (size_t i = 0; i < users.size(); i++)
 		{
 			std::string user = users[i];
-			std::cout << "user: " << user << std::endl;
+			std::cout << "		=> USER: " << user << std::endl;
 			//Client* target = server.getClientByNick(users[i]);
 
 			// std::vector<Client*> clients = server.getClients();
@@ -113,16 +111,9 @@ void Kick::execute(Server &server, std::string const &command, std::vector<Clien
 			// envoyer la notification a tous les membres du channel
 			std::cout << "				user: " << user << std::endl;
 			std::cout << "				comment: " << comment << std::endl;
-		output.insert(std::pair<std::string, std::set<int> >(RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment), fds));
+			output.insert(std::pair<std::string, std::set<int> >(RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment), fds));
 			std::set<int> set = channel->noMsgforme((*it));
-			if (!comment.empty())
-			{
-				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert(set.begin(), set.end());
-			}
-			else
-			{
-				output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert(set.begin(), set.end());
-			}
+			output[RPL_KICK((*it)->getNick(), (*it)->getUser(), channelName, user, comment)].insert(set.begin(), set.end());
 			channel->removeClientFromChannel(user);
 		}
 	}

@@ -35,9 +35,10 @@ void User::execute(Server &server, std::string const &command, std::vector<Clien
 	{
 		count++;
 	}
+
 	std::cout << " FD = " << (*it)->getUse() << std::endl;
 	std::cerr << "COUNT WORD = " << count << std::endl;
-	if (count != 5)//irssi vous en comptez 5
+	if (count != 5)
 	{
 		output.insert(std::pair<std::string, std::set<int> >(ERR_NEEDMOREPARAMS((*it)->getNick()), fds));
 		return ;
